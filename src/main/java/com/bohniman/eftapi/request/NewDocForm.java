@@ -1,7 +1,5 @@
 package com.bohniman.eftapi.request;
 
-import java.util.Date;
-
 import javax.validation.constraints.Size;
 
 public class NewDocForm {
@@ -18,7 +16,11 @@ public class NewDocForm {
 
 	private byte[] doc;
 
-	private Date capturedAt;
+	private int noOfDocuments;  // to verify the no. of doc against a suspect
+
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private String capturedAt;
 	private String capturedBy;
 //	private String fkCurrentStatusCode;
 	private String fkSuspectStateCode;
@@ -86,11 +88,19 @@ public class NewDocForm {
 		this.doc = doc;
 	}
 
-	public Date getCapturedAt() {
+	public int getNoOfDocuments() {
+		return noOfDocuments;
+	}
+
+	public void setNoOfDocuments(int noOfDocuments) {
+		this.noOfDocuments = noOfDocuments;
+	}
+
+	public String getCapturedAt() {
 		return capturedAt;
 	}
 
-	public void setCapturedAt(Date capturedAt) {
+	public void setCapturedAt(String capturedAt) {
 		this.capturedAt = capturedAt;
 	}
 

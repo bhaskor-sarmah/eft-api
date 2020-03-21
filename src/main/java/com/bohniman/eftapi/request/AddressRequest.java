@@ -52,7 +52,7 @@ public class AddressRequest {
 	private String revenueVillageName;
 	private String deviceId;
 	private String ipAddress;
-	private Date capturedAt;
+	private String capturedAt;
 	private String capturedBy;
 
 //	private String fkCurrentStatusCode;
@@ -74,7 +74,6 @@ public class AddressRequest {
 		this.fkAddressTypeCode = fkAddressTypeCode;
 	}
 
-	
 	public String getOfflineId() {
 		return offlineId;
 	}
@@ -259,11 +258,11 @@ public class AddressRequest {
 		this.ipAddress = ipAddress;
 	}
 
-	public Date getCapturedAt() {
+	public String getCapturedAt() {
 		return capturedAt;
 	}
 
-	public void setCapturedAt(Date capturedAt) {
+	public void setCapturedAt(String capturedAt) {
 		this.capturedAt = capturedAt;
 	}
 
@@ -275,5 +274,4 @@ public class AddressRequest {
 		this.capturedBy = capturedBy;
 	}
 
-	
 }

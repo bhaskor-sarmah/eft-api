@@ -3,9 +3,11 @@ package com.bohniman.eftapi.service;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bohniman.eftapi.model.AppMasterVersion;
+import com.bohniman.eftapi.model.User;
 import com.bohniman.eftapi.repository.AddressTypeRepository;
 import com.bohniman.eftapi.repository.AppDevicePinRepository;
 import com.bohniman.eftapi.repository.CountryRepository;
@@ -22,12 +24,15 @@ import com.bohniman.eftapi.repository.RouteRepository;
 import com.bohniman.eftapi.repository.StateRepository;
 import com.bohniman.eftapi.repository.SuspectDocumentRepository;
 import com.bohniman.eftapi.repository.ThanaRepository;
+import com.bohniman.eftapi.repository.UserRepository;
 import com.bohniman.eftapi.repository.VillageRepository;
+import com.bohniman.eftapi.request.ChangePasswordForm;
+import com.bohniman.eftapi.response.Acknowledge;
 import com.bohniman.eftapi.response.MasterTableResponse;
 
 @Service
 public class MasterService {
-	
+
 	@Autowired
 	AppDevicePinRepository pinRepository;
 
@@ -63,8 +68,18 @@ public class MasterService {
 	ThanaRepository thanaRepository;
 	@Autowired
 	AppMasterVersionRepository masterVersionRepository;
-	
-	//Master Version Table
+	@Autowired
+	UserRepository userRepository;
+
+	public String getThanaCode(String username) {
+		User user = userRepository.findByUsername(username);
+		if (null != user) {
+			return user.getUserScope().getScopeCode(); // thanaCode
+		}
+		return null;
+	}
+
+	// Master Version Table
 	public ArrayList<AppMasterVersion> getMasterVersionTable() {
 		return masterVersionRepository.findAll();
 	}
@@ -78,8 +93,9 @@ public class MasterService {
 			masterTableResponse.setStateList(stateRepository.findByIsActive("Y"));
 			masterTableResponse.setDistrictList(districtRepository.findByIsActive("Y"));
 			masterTableResponse.setLacList(lacRepository.findByIsActive("Y"));
-			masterTableResponse.setThanaList(thanaRepository.findByThanaCodeAndIsActive(thanaCode, "Y"));
-			masterTableResponse.setVillageList(villageRepository.findByThana_ThanaCodeAndIsActive(thanaCode, "Y"));
+			masterTableResponse.setThanaList(thanaRepository.findByIsActive("Y"));
+//			masterTableResponse.setVillageList(villageRepository.findByThana_ThanaCodeAndIsActive(thanaCode, "Y"));
+			masterTableResponse.setVillageList(villageRepository.findByIsActive("Y"));
 			masterTableResponse.setEmployementTypeList(employmentTypeRepository.findByIsActive("Y"));
 			masterTableResponse.setGenderList(genderRepository.findByIsActive("Y"));
 			masterTableResponse.setMaritalStatusList(maritalStatusRepository.findByIsActive("Y"));
@@ -94,5 +110,29 @@ public class MasterService {
 
 		}
 		return masterTableResponse;
+	}
+
+	//Password change
+	public Acknowledge changePassword(ChangePasswordForm changePasswordForm, String username) {
+
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+		if (changePasswordForm.getNewPassword().equals(changePasswordForm.getConfirmPassword())) {
+			
+			User user = userRepository.findByUsername(username);
+			if (null != user) {
+				if (passwordEncoder.matches(changePasswordForm.getCurrentPassword(), user.getPassword())) {
+					user.setPassword(passwordEncoder.encode(changePasswordForm.getNewPassword()));
+					userRepository.save(user);
+					return new Acknowledge("1", "Password changed.");
+				}else {
+					return new Acknowledge("0", "Invalid current password.");
+				}
+			}else {
+				return new Acknowledge("0", "Invalid username.");
+			}
+		} else {
+			return new Acknowledge("0", "Password mismatch.");
+		}
 	}
 }

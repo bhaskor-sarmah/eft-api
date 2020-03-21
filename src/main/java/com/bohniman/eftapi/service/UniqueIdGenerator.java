@@ -53,7 +53,6 @@ public class UniqueIdGenerator implements IdentifierGenerator, Configurable {
         
         String userscope = "";
         
-        System.out.println("HEY HEY HEY");
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
@@ -75,7 +74,7 @@ public class UniqueIdGenerator implements IdentifierGenerator, Configurable {
                 if (rs.next()) {
                     uniqueId = rs.getInt("uniqueId");
                 }
-                System.out.println("Suspect Unique Id : " + uniqueId);
+//                System.out.println("Suspect Unique Id : " + uniqueId);
 
         } catch (SQLException ex) {
             ex.printStackTrace();

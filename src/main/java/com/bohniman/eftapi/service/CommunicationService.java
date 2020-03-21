@@ -196,8 +196,8 @@ public class CommunicationService {
 
 			TransNotification notification = new TransNotification();
 			notification.setTarget("INVESTIGATION REPLY");
-			notification.setTargetPath("page-spd-suspect-details/suspectId?tab=investigation");
-			notification.setRoleTo(communication.getRoleFrom()); // SPD - From whom this communication started
+			notification.setTargetPath("page-spd-suspect-details/"+communication.getSuspect().getSuspectId()+"?tab=investigation");
+			notification.setRoleTo(communication.getRoleFrom().toLowerCase()); // spd - From whom this communication started
 			notification.setIsViewed(false);
 			notification.setSuspect(communication.getSuspect());
 			notification.setCurrentStatus(currentStatus); // Active
@@ -223,7 +223,7 @@ public class CommunicationService {
 			doc.setDocument(suspectDocumentRepository.findByDocCode(docForm.getFkDocCode()));
 			doc.setOtherDocument(docForm.getOtherDocument());
 			doc.setDocDetails(docForm.getDocDetails());
-			doc.setCapturedAt(docForm.getCapturedAt());
+			doc.setCapturedAt(DateService.getFormattedDate(docForm.getCapturedAt()));
 			doc.setCapturedBy(docForm.getCapturedBy());
 			doc.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
 			doc.setSuspectState(stateRepository.findByStateCode(docForm.getFkSuspectStateCode()));

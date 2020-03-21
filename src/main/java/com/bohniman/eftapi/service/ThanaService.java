@@ -13,9 +13,10 @@ public class ThanaService {
 	DeviceRepository deviceRepository;
 
 	public ThanaPayload getThana(String macId) {
-		ThanaPayload thana = new ThanaPayload();
+		ThanaPayload thana = null;
 		AppDevice device = deviceRepository.findByMacId(macId);
 		if (null != device) {
+			thana = new ThanaPayload();
 			thana.setThanaCode(device.getThana().getThanaCode());
 			thana.setThanaName(device.getThana().getThanaName());
 			thana.setDistrictCode(device.getThana().getDistrict().getDistrictCode());

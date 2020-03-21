@@ -2,6 +2,11 @@ package com.bohniman.eftapi.request;
 
 import java.util.Date;
 
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 public class SuspectRequest {
 //	private String suspectId;
 	private String offlineId;
@@ -22,7 +27,8 @@ public class SuspectRequest {
 	private String witness2;
 
 	private String age;
-	private Date dateOfBirth;
+	private String dateOfBirth;
+
 	private String placeOfBirth;
 	private String email;
 	private String mobileNo;
@@ -56,6 +62,9 @@ public class SuspectRequest {
 	private String sinceWhenStaying;
 	private String fkRouteCode;
 
+	private boolean hasDoc; // if true, doc is available
+	private boolean hasBio; // if false, doc is not available
+
 	private String fkSuspectStateCode;
 	private String fkSuspectDistrictCode;
 //	private String fkSuspectFtCode;
@@ -64,7 +73,7 @@ public class SuspectRequest {
 
 	private String deviceId;
 
-	private Date capturedAt;
+	private String capturedAt;
 	private String capturedBy;
 
 	private String capturedLocLat;
@@ -199,11 +208,11 @@ public class SuspectRequest {
 		this.age = age;
 	}
 
-	public Date getDateOfBirth() {
+	public String getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(String dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
@@ -415,6 +424,22 @@ public class SuspectRequest {
 		this.fkRouteCode = fkRouteCode;
 	}
 
+	public boolean isHasDoc() {
+		return hasDoc;
+	}
+
+	public void setHasDoc(boolean hasDoc) {
+		this.hasDoc = hasDoc;
+	}
+
+	public boolean isHasBio() {
+		return hasBio;
+	}
+
+	public void setHasBio(boolean hasBio) {
+		this.hasBio = hasBio;
+	}
+
 	public String getFkSuspectStateCode() {
 		return fkSuspectStateCode;
 	}
@@ -447,11 +472,11 @@ public class SuspectRequest {
 		this.deviceId = deviceId;
 	}
 
-	public Date getCapturedAt() {
+	public String getCapturedAt() {
 		return capturedAt;
 	}
 
-	public void setCapturedAt(Date capturedAt) {
+	public void setCapturedAt(String capturedAt) {
 		this.capturedAt = capturedAt;
 	}
 

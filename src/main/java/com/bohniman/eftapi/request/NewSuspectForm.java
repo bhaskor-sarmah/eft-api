@@ -8,6 +8,7 @@ public class NewSuspectForm {
 	private ArrayList<FamilyRequest> family;
 	private ArrayList<AddressRequest> address;
 	private byte[] photo;
+	
 
 	public NewSuspectForm() {
 		super();
@@ -45,4 +46,4 @@ public class NewSuspectForm {
 		this.photo = photo;
 	}
 
-}
+	}

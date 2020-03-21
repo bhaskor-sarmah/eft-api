@@ -55,8 +55,9 @@ public class TransSuspectFamily extends Auditable {
 	private String deviceId;
 	@Size(max = 80)
 	private String ipAddress;
-	@Temporal(TemporalType.DATE)
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date capturedAt;
 	@Size(max = 200)
 	private String capturedBy;

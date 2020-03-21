@@ -32,12 +32,12 @@ public class FamilyRequest {
 	private String fkRelationCode;
 	private String memberName;
 	private String fkGenderCode;
-	private Date dateOfBirth;
+	private String dateOfBirth;
 	private String age;
 	private String placeOfBirth;
 	private String deviceId;
 	private String ipAddress;
-	private Date capturedAt;
+	private String capturedAt;
 	private String capturedBy;
 //	private String fkCurrentStatusCode;
 //	private String fkSuspectStateCode;
@@ -82,11 +82,11 @@ public class FamilyRequest {
 		this.fkGenderCode = fkGenderCode;
 	}
 
-	public Date getDateOfBirth() {
+	public String getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(String dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
@@ -122,11 +122,11 @@ public class FamilyRequest {
 		this.ipAddress = ipAddress;
 	}
 
-	public Date getCapturedAt() {
+	public String getCapturedAt() {
 		return capturedAt;
 	}
 
-	public void setCapturedAt(Date capturedAt) {
+	public void setCapturedAt(String capturedAt) {
 		this.capturedAt = capturedAt;
 	}
 

@@ -26,6 +26,9 @@ public class MasterDistrict extends Auditable {
 	private String districtAsm;
 
 	@Size(max = 30)
+	private String typeOfDistrict;
+
+	@Size(max = 30)
 	private String version;
 
 	@Size(max = 30)
@@ -66,6 +69,14 @@ public class MasterDistrict extends Auditable {
 
 	public void setDistrictAsm(String districtAsm) {
 		this.districtAsm = districtAsm;
+	}
+
+	public String getTypeOfDistrict() {
+		return typeOfDistrict;
+	}
+
+	public void setTypeOfDistrict(String typeOfDistrict) {
+		this.typeOfDistrict = typeOfDistrict;
 	}
 
 	public String getVersion() {

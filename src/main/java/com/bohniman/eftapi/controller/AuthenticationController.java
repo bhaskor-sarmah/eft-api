@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bohniman.eftapi.model.User;
+import com.bohniman.eftapi.payload.ThanaPayload;
 import com.bohniman.eftapi.repository.DeviceRepository;
 import com.bohniman.eftapi.repository.UserRepository;
 import com.bohniman.eftapi.request.LoginForm;
@@ -46,6 +47,9 @@ public class AuthenticationController {
 
 		User user = userRepository.findByUsername(loginRequest.getUsername());
 
+		if (null == user) {
+			return ResponseEntity.ok(new Acknowledge("0", "Invalid username!"));
+		}
 		// if user is active
 		if (user.isStatus()) {
 			try {
@@ -57,10 +61,21 @@ public class AuthenticationController {
 
 				String jwt = jwttokenProvider.generateJwtToken(authentication);
 				System.out.println(jwt);
-				return ResponseEntity.ok(new JwtAuthResponse(jwt, thanaService.getThana(loginRequest.getMacId())));
+				ThanaPayload thanaPayload = thanaService.getThana(loginRequest.getMacId());
+				if (null != thanaPayload) {
+					// User's thana and the device thana is same
+					if (user.getUserScope().getScopeCode().equals(thanaPayload.getThanaCode())) {
+						return ResponseEntity.ok(new JwtAuthResponse(jwt, thanaPayload));
+					} else {
+						return ResponseEntity.ok(
+								new Acknowledge("0", "Device is mapped with " + thanaPayload.getThanaName() + " PS"));
+					}
+				} else {
+					return ResponseEntity.ok(new Acknowledge("0", "Device is not registred"));
+				}
 			} catch (Exception e) {
 				System.out.println("EXCEPTION : " + e.getMessage());
-				return ResponseEntity.ok(new Acknowledge("0", "Invalid username & password!"));
+				return ResponseEntity.ok(new Acknowledge("0", "Invalid password!"));
 			}
 		} else {
 			return ResponseEntity.ok(new Acknowledge("0", "Permission denied!"));

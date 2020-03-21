@@ -1,4 +1,4 @@
-   package com.bohniman.eftapi.controller;
+package com.bohniman.eftapi.controller;
 
 import javax.validation.Valid;
 
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bohniman.eftapi.repository.AppDevicePinRepository;
+import com.bohniman.eftapi.request.ChangePasswordForm;
 import com.bohniman.eftapi.request.MasterVersionForm;
 import com.bohniman.eftapi.request.PasscodeForm;
 import com.bohniman.eftapi.request.PinUserForm;
@@ -38,12 +39,28 @@ public class MasterController {
 	// # API
 	// # Fetch pass code for a device
 	// ========================================================================
+	@RequestMapping(value = "/api/changepassword", produces = { "application/JSON" }, consumes = {
+			"application/JSON" }, method = RequestMethod.POST)
+	@PreAuthorize("hasRole('ROLE_IO')")
+	public ResponseEntity<?> changePassword(@Valid @RequestHeader(value = "Authorization") String jwtToken,
+			@RequestBody ChangePasswordForm changePasswordForm) {
+
+		String username = jwttokenProvider.getUserNameFromJwtToken(jwtToken.replace("Bearer ", ""));
+
+		return ResponseEntity.ok(masterService.changePassword(changePasswordForm, username));
+
+	}
+
+	// ========================================================================
+	// # API
+	// # Fetch pass code for a device
+	// ========================================================================
 	@RequestMapping(value = "/api/passcode", produces = { "application/JSON" }, consumes = {
 			"application/JSON" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ROLE_IO')")
 	public ResponseEntity<?> getPasscode(@Valid @RequestHeader(value = "Authorization") String jwtToken,
 			@RequestBody PasscodeForm passcodeForm) {
-		System.out.println(passcodeForm.getMacId());
+
 		return ResponseEntity.ok(devicePinRepository.findByDevice_MacId(passcodeForm.getMacId()));
 
 	}
@@ -85,7 +102,8 @@ public class MasterController {
 			@RequestBody MasterVersionForm masterVersionForm) {
 
 		String username = jwttokenProvider.getUserNameFromJwtToken(jwtToken.replace("Bearer ", ""));
-		return ResponseEntity.ok(masterService.getAllMasterData("18300211"));
+
+		return ResponseEntity.ok(masterService.getAllMasterData(masterService.getThanaCode(username)));
 
 	}
 }

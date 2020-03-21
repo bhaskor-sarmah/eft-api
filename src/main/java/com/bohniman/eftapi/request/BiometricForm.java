@@ -15,18 +15,18 @@ public class BiometricForm {
 	private byte[] rightLittle;
 	private byte[] leftIris;
 	private byte[] rightIris;
-	private byte[] leftThumbTmpl;
-	private byte[] leftIndexTmpl;
-	private byte[] leftMiddleTmpl;
-	private byte[] leftRingTmpl;
-	private byte[] leftLittleTmpl;
-	private byte[] rightThumbTmpl;
-	private byte[] rightIndexTmpl;
-	private byte[] rightMiddleTmpl;
-	private byte[] rightRingTmpl;
-	private byte[] rightLittleTmpl;
-	private byte[] leftIrisTmpl;
-	private byte[] rightIrisTmpl;
+	private String leftThumbTmpl;
+	private String leftIndexTmpl;
+	private String leftMiddleTmpl;
+	private String leftRingTmpl;
+	private String leftLittleTmpl;
+	private String rightThumbTmpl;
+	private String rightIndexTmpl;
+	private String rightMiddleTmpl;
+	private String rightRingTmpl;
+	private String rightLittleTmpl;
+	private String leftIrisTmpl;
+	private String rightIrisTmpl;
 	private boolean leftThumbFlag;
 	private boolean leftIndexFlag;
 	private boolean leftMiddleFlag;
@@ -157,99 +157,99 @@ public class BiometricForm {
 		this.rightIris = rightIris;
 	}
 
-	public byte[] getLeftThumbTmpl() {
+	public String getLeftThumbTmpl() {
 		return leftThumbTmpl;
 	}
 
-	public void setLeftThumbTmpl(byte[] leftThumbTmpl) {
+	public void setLeftThumbTmpl(String leftThumbTmpl) {
 		this.leftThumbTmpl = leftThumbTmpl;
 	}
 
-	public byte[] getLeftIndexTmpl() {
+	public String getLeftIndexTmpl() {
 		return leftIndexTmpl;
 	}
 
-	public void setLeftIndexTmpl(byte[] leftIndexTmpl) {
+	public void setLeftIndexTmpl(String leftIndexTmpl) {
 		this.leftIndexTmpl = leftIndexTmpl;
 	}
 
-	public byte[] getLeftMiddleTmpl() {
+	public String getLeftMiddleTmpl() {
 		return leftMiddleTmpl;
 	}
 
-	public void setLeftMiddleTmpl(byte[] leftMiddleTmpl) {
+	public void setLeftMiddleTmpl(String leftMiddleTmpl) {
 		this.leftMiddleTmpl = leftMiddleTmpl;
 	}
 
-	public byte[] getLeftRingTmpl() {
+	public String getLeftRingTmpl() {
 		return leftRingTmpl;
 	}
 
-	public void setLeftRingTmpl(byte[] leftRingTmpl) {
+	public void setLeftRingTmpl(String leftRingTmpl) {
 		this.leftRingTmpl = leftRingTmpl;
 	}
 
-	public byte[] getLeftLittleTmpl() {
+	public String getLeftLittleTmpl() {
 		return leftLittleTmpl;
 	}
 
-	public void setLeftLittleTmpl(byte[] leftLittleTmpl) {
+	public void setLeftLittleTmpl(String leftLittleTmpl) {
 		this.leftLittleTmpl = leftLittleTmpl;
 	}
 
-	public byte[] getRightThumbTmpl() {
+	public String getRightThumbTmpl() {
 		return rightThumbTmpl;
 	}
 
-	public void setRightThumbTmpl(byte[] rightThumbTmpl) {
+	public void setRightThumbTmpl(String rightThumbTmpl) {
 		this.rightThumbTmpl = rightThumbTmpl;
 	}
 
-	public byte[] getRightIndexTmpl() {
+	public String getRightIndexTmpl() {
 		return rightIndexTmpl;
 	}
 
-	public void setRightIndexTmpl(byte[] rightIndexTmpl) {
+	public void setRightIndexTmpl(String rightIndexTmpl) {
 		this.rightIndexTmpl = rightIndexTmpl;
 	}
 
-	public byte[] getRightMiddleTmpl() {
+	public String getRightMiddleTmpl() {
 		return rightMiddleTmpl;
 	}
 
-	public void setRightMiddleTmpl(byte[] rightMiddleTmpl) {
+	public void setRightMiddleTmpl(String rightMiddleTmpl) {
 		this.rightMiddleTmpl = rightMiddleTmpl;
 	}
 
-	public byte[] getRightRingTmpl() {
+	public String getRightRingTmpl() {
 		return rightRingTmpl;
 	}
 
-	public void setRightRingTmpl(byte[] rightRingTmpl) {
+	public void setRightRingTmpl(String rightRingTmpl) {
 		this.rightRingTmpl = rightRingTmpl;
 	}
 
-	public byte[] getRightLittleTmpl() {
+	public String getRightLittleTmpl() {
 		return rightLittleTmpl;
 	}
 
-	public void setRightLittleTmpl(byte[] rightLittleTmpl) {
+	public void setRightLittleTmpl(String rightLittleTmpl) {
 		this.rightLittleTmpl = rightLittleTmpl;
 	}
 
-	public byte[] getLeftIrisTmpl() {
+	public String getLeftIrisTmpl() {
 		return leftIrisTmpl;
 	}
 
-	public void setLeftIrisTmpl(byte[] leftIrisTmpl) {
+	public void setLeftIrisTmpl(String leftIrisTmpl) {
 		this.leftIrisTmpl = leftIrisTmpl;
 	}
 
-	public byte[] getRightIrisTmpl() {
+	public String getRightIrisTmpl() {
 		return rightIrisTmpl;
 	}
 
-	public void setRightIrisTmpl(byte[] rightIrisTmpl) {
+	public void setRightIrisTmpl(String rightIrisTmpl) {
 		this.rightIrisTmpl = rightIrisTmpl;
 	}
 

@@ -185,6 +185,12 @@ public class TransSuspect extends Auditable {
 	@Size(max = 200)
 	private String policeCaseNo;
 
+	@Size(max = 30)
+	private String docFlag;
+
+	@Size(max = 30)
+	private String bioFlag;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "fk_suspect_state_code", nullable = false)
 	private MasterState suspectState;
@@ -643,6 +649,22 @@ public class TransSuspect extends Auditable {
 
 	public void setPoliceCaseNo(String policeCaseNo) {
 		this.policeCaseNo = policeCaseNo;
+	}
+
+	public String getDocFlag() {
+		return docFlag;
+	}
+
+	public void setDocFlag(String docFlag) {
+		this.docFlag = docFlag;
+	}
+
+	public String getBioFlag() {
+		return bioFlag;
+	}
+
+	public void setBioFlag(String bioFlag) {
+		this.bioFlag = bioFlag;
 	}
 
 	public MasterState getSuspectState() {

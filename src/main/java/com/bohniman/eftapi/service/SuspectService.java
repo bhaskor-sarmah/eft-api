@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
-
+import sun.misc.BASE64Decoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -162,6 +163,12 @@ public class SuspectService {
 		return file.toString();
 	}
 
+	public byte[] getBytesFromString(String iamge) throws IOException {
+		BASE64Decoder decoder = new BASE64Decoder();
+		byte[] decodedBytes = decoder.decodeBuffer(iamge);
+		return decodedBytes;
+	}
+
 	@Transactional(rollbackFor = { Exception.class })
 	public Acknowledge saveSuspect(NewSuspectForm newSuspectForm) {
 
@@ -195,28 +202,29 @@ public class SuspectService {
 				suspect.setPhotoPath(path);
 				suspectRepository.save(suspect);
 
-				// Add Notification
-
-				TransNotification notification = new TransNotification();
-				notification.setTarget("NEW FRESH CASE");
-				notification.setTargetPath("page-spd-suspects/fresh-case");
-				notification.setRoleTo("SPD"); // SPD - From whom this communication started
-				notification.setIsViewed(false);
-				notification.setSuspect(suspect);
-				notification.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01")); // Active
-				notification.setRemarks(suspect.getSuspectThana().getThanaName()); // Thana name will be displayed in
-																					// notification
-				notificationRepository.save(notification);
-
 				return new Acknowledge("1", "New suspect synced to central server",
 						new SuspectIdPayload(suspect.getSuspectId(), suspect.getOfflineId()));
 			}
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return new Acknowledge("0", "Sync failed");
 		}
 	}
 
-	public TransSuspect mapSuspect(SuspectRequest suspectReq) {
+	public void addFreshNotification(TransSuspect suspect) {
+		TransNotification notification = new TransNotification();
+		notification.setTarget("NEW FRESH CASE");
+		notification.setTargetPath("page-spd-suspects/fresh-case");
+		notification.setRoleTo("spd"); // spd - From whom this communication started (spd is in small latter)
+		notification.setIsViewed(false);
+		notification.setSuspect(suspect);
+		notification.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01")); // Active
+		notification.setRemarks(suspect.getSuspectThana().getThanaName()); // Thana name will be displayed in
+																			// notification
+		notificationRepository.save(notification);
+	}
+
+	public TransSuspect mapSuspect(SuspectRequest suspectReq) throws ParseException {
 		TransSuspect suspect = new TransSuspect();
 		suspect.setRecordType("Live");
 		suspect.setInitiatedBy("IO");
@@ -234,7 +242,7 @@ public class SuspectService {
 		suspect.setWitness1(suspectReq.getWitness1());
 		suspect.setWitness2(suspectReq.getWitness2());
 		suspect.setAge(suspectReq.getAge());
-		suspect.setDateOfBirth(suspectReq.getDateOfBirth());
+		suspect.setDateOfBirth(DateService.getFormattedDate(suspectReq.getDateOfBirth()));
 		suspect.setPlaceOfBirth(suspectReq.getPlaceOfBirth());
 		suspect.setEmail(suspectReq.getEmail());
 		suspect.setMobileNo(suspectReq.getMobileNo());
@@ -266,22 +274,42 @@ public class SuspectService {
 		suspect.setSuspectDistrict(districtRepository.findByDistrictCode(suspectReq.getFkSuspectDistrictCode()));
 		suspect.setSuspectThana(thanaRepository.findByThanaCode(suspectReq.getFkSuspectThanaCode()));
 		suspect.setDeviceId(suspectReq.getDeviceId());
-		suspect.setCapturedAt(suspectReq.getCapturedAt());
+		suspect.setCapturedAt(DateService.getFormattedDate(suspectReq.getCapturedAt()));
 		suspect.setCapturedBy(suspectReq.getCapturedBy());
 		suspect.setCapturedLocLat(suspectReq.getCapturedLocLat());
 		suspect.setCapturedLocLong(suspectReq.getCapturedLocLong());
 
-		suspect.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
+		// Biometric and Doc available
+		// Current status will be Inactive
+
+		if (suspectReq.isHasDoc()) {
+			suspect.setDocFlag("Available");
+		} else {
+			suspect.setDocFlag("Not Available");
+		}
+
+		if (suspectReq.isHasBio()) {
+			suspect.setBioFlag("Available");
+		} else {
+			suspect.setBioFlag("Not Available");
+		}
+
+		if (suspectReq.isHasBio() || suspectReq.isHasDoc()) {
+			suspect.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("02"));
+		} else {
+			suspect.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
+		}
 		suspect.setPoliceCaseStatus(policeCaseStatusRepository.findByCaseStatusCode("01"));
 		return suspect;
 	}
 
-	public TransSuspectAddress mapSuspectAddress(AddressRequest addressReq, TransSuspect suspect) {
+	public TransSuspectAddress mapSuspectAddress(AddressRequest addressReq, TransSuspect suspect)
+			throws ParseException {
 		TransSuspectAddress address = new TransSuspectAddress();
 
 		/*** Reference from suspect **********/
 		address.setSuspect(suspect);
-		address.setCurrentStatus(suspect.getCurrentStatus());
+		address.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
 		address.setSuspectState(suspect.getSuspectState());
 		address.setSuspectDistrict(suspect.getSuspectDistrict());
 		address.setSuspectThana(suspect.getSuspectThana());
@@ -289,13 +317,31 @@ public class SuspectService {
 
 		address.setAddressType(addressTypeRepository.findByAddressTypeCode(addressReq.getFkAddressTypeCode()));
 		address.setOfflineId(addressReq.getOfflineId());
-		address.setCountry(countryRepository.findByCountryCode(addressReq.getFkCountryCode()));
-		address.setOtherCountry(addressReq.getOtherCountry());
-		address.setState(stateRepository.findByStateCode(addressReq.getFkStateCode()));
-		address.setOtherState(addressReq.getOtherState());
+		
+		//Save country code as Others if not India
+		if (addressReq.getFkCountryCode().equals("91") || addressReq.getFkCountryCode().equals("00")) {
+			address.setCountry(countryRepository.findByCountryCode(addressReq.getFkCountryCode()));
+			address.setOtherCountry(addressReq.getOtherCountry());
+		} else {
+			address.setCountry(countryRepository.findByCountryCode("00"));
+			address.setOtherCountry(
+					countryRepository.findByCountryCode(addressReq.getFkCountryCode()).getCountryName());
+		}
+
+		//Save sate code as Others if not Assam and country is India
+		if (addressReq.getFkStateCode().equals("18") || addressReq.getFkStateCode().equals("99") || addressReq.getFkStateCode().equals("00")) {
+			address.setState(stateRepository.findByStateCode(addressReq.getFkStateCode()));
+			address.setOtherState(addressReq.getOtherState());
+		} else {
+			address.setState(stateRepository.findByStateCode("99"));
+			address.setOtherState(stateRepository.findByStateCode(addressReq.getFkStateCode()).getStateName());
+		}
+		
+		
 		address.setDistrict(districtRepository.findByDistrictCode(addressReq.getFkDistrictCode()));
 		address.setOtherDistrict(addressReq.getOtherDistrict());
 		address.setThana(thanaRepository.findByThanaCode(addressReq.getFkThanaCode()));
+		address.setOtherThana(addressReq.getOtherThana());
 		address.setVillage(villageRepository.findByVillageCode(addressReq.getFkVillageCode()));
 		address.setOtherVillage(addressReq.getOtherVillage());
 		address.setLatitude(addressReq.getLatitude());
@@ -310,17 +356,17 @@ public class SuspectService {
 		address.setRevenueVillageName(addressReq.getRevenueVillageName());
 		address.setDeviceId(addressReq.getDeviceId());
 		address.setIpAddress(addressReq.getIpAddress());
-		address.setCapturedAt(addressReq.getCapturedAt());
+		address.setCapturedAt(DateService.getFormattedDate(addressReq.getCapturedAt()));
 		address.setCapturedBy(addressReq.getCapturedBy());
 		return address;
 	}
 
-	public TransSuspectFamily mapSuspectFamily(FamilyRequest familyReq, TransSuspect suspect) {
+	public TransSuspectFamily mapSuspectFamily(FamilyRequest familyReq, TransSuspect suspect) throws ParseException {
 		TransSuspectFamily family = new TransSuspectFamily();
 
 		/*** Reference from suspect **********/
 		family.setSuspect(suspect);
-		family.setCurrentStatus(suspect.getCurrentStatus());
+		family.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
 		family.setSuspectState(suspect.getSuspectState());
 		family.setSuspectDistrict(suspect.getSuspectDistrict());
 		family.setSuspectThana(suspect.getSuspectThana());
@@ -330,12 +376,12 @@ public class SuspectService {
 		family.setRelation(relationRepository.findByRelationCode(familyReq.getFkRelationCode()));
 		family.setMemberName(familyReq.getMemberName());
 		family.setGender(genderRepository.findByGenderCode(familyReq.getFkGenderCode()));
-		family.setDateOfBirth(familyReq.getDateOfBirth());
+		family.setDateOfBirth(DateService.getFormattedDate(familyReq.getDateOfBirth()));
 		family.setAge(familyReq.getAge());
 		family.setPlaceOfBirth(familyReq.getPlaceOfBirth());
 		family.setDeviceId(familyReq.getDeviceId());
 		family.setIpAddress(familyReq.getIpAddress());
-		family.setCapturedAt(familyReq.getCapturedAt());
+		family.setCapturedAt(DateService.getFormattedDate(familyReq.getCapturedAt()));
 		family.setCapturedBy(familyReq.getCapturedBy());
 		return family;
 	}
@@ -348,16 +394,18 @@ public class SuspectService {
 //	@Transactional(rollbackFor = { Exception.class })
 	public Acknowledge saveDocument(NewDocForm docForm) {
 		String docId = docForm.getDocId(); // offline pk
+
+		TransSuspect suspect = suspectRepository.findBySuspectId(docForm.getFkSuspectId());
 		try {
 
 			TransSuspectDoc doc = new TransSuspectDoc();
 			doc.setDocId(null);
-			doc.setSuspect(suspectRepository.findBySuspectId(docForm.getFkSuspectId()));
+			doc.setSuspect(suspect);
 			doc.setOfflineId(docForm.getOfflineId());
 			doc.setDocument(documentRepository.findByDocCode(docForm.getFkDocCode()));
 			doc.setOtherDocument(docForm.getOtherDocument());
 			doc.setDocDetails(docForm.getDocDetails());
-			doc.setCapturedAt(docForm.getCapturedAt());
+			doc.setCapturedAt(DateService.getFormattedDate(docForm.getCapturedAt()));
 			doc.setCapturedBy(docForm.getCapturedBy());
 			doc.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
 			doc.setSuspectState(stateRepository.findByStateCode(docForm.getFkSuspectStateCode()));
@@ -374,8 +422,29 @@ public class SuspectService {
 			doc.setDocPath(docPath);
 			suspectDocRepository.save(doc);
 
+			// If document upload completed, i.e., no. of doc = no. of saved doc
+			// Update doc flag
+			if (docForm.getNoOfDocuments() == suspectDocRepository.countBySuspect(suspect)) {
+				suspect.setDocFlag("Uploaded");
+				suspect = suspectRepository.save(suspect);
+			}
+
+			// If any bio and doc uploaded, then set current status Active
+			Boolean isActive = true;
+			if (suspect.getDocFlag().equalsIgnoreCase("Available")
+					|| suspect.getBioFlag().equalsIgnoreCase("Available")) {
+				isActive = false;
+			}
+
+			if (isActive) {
+				suspect.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
+				suspect = suspectRepository.save(suspect);
+				// Add Notification
+				addFreshNotification(suspect);
+			}
 			return new Acknowledge("1", "Document Synced successfully", new DocIdPayload(docId));
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return new Acknowledge("0", "Sync failed", new DocIdPayload(docId));
 		}
 	}
@@ -387,14 +456,19 @@ public class SuspectService {
 		TransBiometricTemplate template = biometricTemplateRepository
 				.findBySuspect_suspectId(biometricForm.getFkSuspectId());
 
+		TransSuspect suspect = suspectRepository.findBySuspectId(biometricForm.getFkSuspectId());
+
 		if (null == biometric) {
+			System.out.println("biometricForm suspect : " + biometricForm.getFkSuspectId());
 			biometric = new TransBiometricDetails();
 
-			biometric.setSuspect(suspectRepository.findBySuspectId(biometricForm.getFkSuspectId()));
+			biometric.setSuspect(suspect);
 			biometric.setOfflineId(biometricForm.getOfflineId());
 
+		}
+		if (null == template) {
 			template = new TransBiometricTemplate();
-			template.setSuspect(suspectRepository.findBySuspectId(biometricForm.getFkSuspectId()));
+			template.setSuspect(suspect);
 			template.setOfflineId(biometricForm.getOfflineId());
 		}
 		String path = null;
@@ -403,85 +477,103 @@ public class SuspectService {
 				path = saveImageFile(biometricForm.getLeftThumb(), biometricForm.getFkSuspectId() + "_LEFT_THUMB",
 						biometricForm.getFkSuspectId());
 				biometric.setLeftThumbPath(path);
-				template.setLeftThumbTmpl(biometricForm.getLeftThumbTmpl());
+				template.setLeftThumbTmpl(getBytesFromString(biometricForm.getLeftThumbTmpl()));
 			}
 			if (biometricForm.isLeftIndexFlag()) {
 				path = saveImageFile(biometricForm.getLeftIndex(), biometricForm.getFkSuspectId() + "_LEFT_INDEX",
 						biometricForm.getFkSuspectId());
 				biometric.setLeftIndexPath(path);
-				template.setLeftIndexTmpl(biometricForm.getLeftIndexTmpl());
+				template.setLeftIndexTmpl(getBytesFromString(biometricForm.getLeftIndexTmpl()));
 			}
 			if (biometricForm.isLeftMiddleFlag()) {
 
 				path = saveImageFile(biometricForm.getLeftMiddle(), biometricForm.getFkSuspectId() + "_LEFT_MIDDLE",
 						biometricForm.getFkSuspectId());
 				biometric.setLeftMiddlePath(path);
-				template.setLeftMiddleTmpl(biometricForm.getLeftMiddleTmpl());
+				template.setLeftMiddleTmpl(getBytesFromString(biometricForm.getLeftMiddleTmpl()));
 			}
 			if (biometricForm.isLeftRingFlag()) {
 				path = saveImageFile(biometricForm.getLeftRing(), biometricForm.getFkSuspectId() + "_LEFT_RING",
 						biometricForm.getFkSuspectId());
 				biometric.setLeftRingPath(path);
-				template.setLeftRingTmpl(biometricForm.getLeftRingTmpl());
+				template.setLeftRingTmpl(getBytesFromString(biometricForm.getLeftRingTmpl()));
 			}
 			if (biometricForm.isLeftLittleFlag()) {
 				path = saveImageFile(biometricForm.getLeftLittle(), biometricForm.getFkSuspectId() + "_LEFT_LITTLE",
 						biometricForm.getFkSuspectId());
 				biometric.setLeftLittlePath(path);
-				template.setLeftLittleTmpl(biometricForm.getLeftLittleTmpl());
+				template.setLeftLittleTmpl(getBytesFromString(biometricForm.getLeftLittleTmpl()));
 			}
 			if (biometricForm.isRightThumbFlag()) {
 				path = saveImageFile(biometricForm.getRightThumb(), biometricForm.getFkSuspectId() + "_RIGHT_THUMB",
 						biometricForm.getFkSuspectId());
 				biometric.setRightThumbPath(path);
-				template.setRightThumbTmpl(biometricForm.getRightThumbTmpl());
+				template.setRightThumbTmpl(getBytesFromString(biometricForm.getRightThumbTmpl()));
 			}
 			if (biometricForm.isRightIndexFlag()) {
 				path = saveImageFile(biometricForm.getRightIndex(), biometricForm.getFkSuspectId() + "_RIGHT_INDEX",
 						biometricForm.getFkSuspectId());
 				biometric.setRightIndexPath(path);
-				template.setRightIndexTmpl(biometricForm.getRightIndexTmpl());
+				template.setRightIndexTmpl(getBytesFromString(biometricForm.getRightIndexTmpl()));
 			}
 			if (biometricForm.isRightMiddleFlag()) {
 				path = saveImageFile(biometricForm.getRightMiddle(), biometricForm.getFkSuspectId() + "_RIGHT_MIDDLE",
 						biometricForm.getFkSuspectId());
 				biometric.setRightMiddlePath(path);
-				template.setRightMiddleTmpl(biometricForm.getRightMiddleTmpl());
+				template.setRightMiddleTmpl(getBytesFromString(biometricForm.getRightMiddleTmpl()));
 			}
 			if (biometricForm.isRightRingFlag()) {
 				path = saveImageFile(biometricForm.getRightRing(), biometricForm.getFkSuspectId() + "_RIGHT_RING",
 						biometricForm.getFkSuspectId());
 				biometric.setRightRingPath(path);
-				template.setRightRingTmpl(biometricForm.getRightRingTmpl());
+				template.setRightRingTmpl(getBytesFromString(biometricForm.getRightRingTmpl()));
 			}
 			if (biometricForm.isRightLittleFlag()) {
 				path = saveImageFile(biometricForm.getRightLittle(), biometricForm.getFkSuspectId() + "_RIGHT_LITTLE",
 						biometricForm.getFkSuspectId());
 				biometric.setRightLittlePath(path);
-				template.setRightLittleTmpl(biometricForm.getRightLittleTmpl());
+				template.setRightLittleTmpl(getBytesFromString(biometricForm.getRightLittleTmpl()));
 			}
 			if (biometricForm.isLeftIrisFlag()) {
 				path = saveImageFile(biometricForm.getLeftIris(), biometricForm.getFkSuspectId() + "_LEFT_IRIS",
 						biometricForm.getFkSuspectId());
-				System.out.println(path);
+//				System.out.println(path);
 				biometric.setLeftIrisPath(path);
-				template.setLeftIrisTmpl(biometricForm.getLeftIrisTmpl());
+				template.setLeftIrisTmpl(getBytesFromString(biometricForm.getLeftIrisTmpl()));
 			}
 			if (biometricForm.isRightIrisFlag()) {
 				path = saveImageFile(biometricForm.getRightIris(), biometricForm.getFkSuspectId() + "_RIGHT_IRIS",
 						biometricForm.getFkSuspectId());
-				System.out.println(path);
+//				System.out.println(path);
 				biometric.setRightIrisPath(path);
-				template.setRightIrisTmpl(biometricForm.getRightIrisTmpl());
+				template.setRightIrisTmpl(getBytesFromString(biometricForm.getRightIrisTmpl()));
 			}
 			biometricRepository.save(biometric);
 			biometricTemplateRepository.save(template);
 
+			// Update bio flag
+			suspect.setBioFlag("Uploaded");
+			suspectRepository.save(suspect);
+
+			Boolean isActive = true;
+			if (suspect.getDocFlag().equalsIgnoreCase("Available")
+					|| suspect.getBioFlag().equalsIgnoreCase("Available")) {
+				isActive = false;
+			}
+
+			if (isActive) {
+				suspect.setCurrentStatus(currentStatusRepository.findByCurrentStatusCode("01"));
+				suspect = suspectRepository.save(suspect);
+				// Add Notification
+				addFreshNotification(suspect);
+			}
+
 			return new Acknowledge("1", "Biometric Synced successfully",
-					new SuspectIdPayload(biometric.getSuspect().getSuspectId(), biometric.getOfflineId()));
+					new SuspectIdPayload(biometricForm.getFkSuspectId(), biometric.getOfflineId()));
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return new Acknowledge("0", "Sync failed",
-					new SuspectIdPayload(biometric.getSuspect().getSuspectId(), biometric.getOfflineId()));
+					new SuspectIdPayload(biometricForm.getFkSuspectId(), biometric.getOfflineId()));
 		}
 
 	}
