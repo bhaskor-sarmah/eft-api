@@ -5,14 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 import javax.imageio.ImageIO;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.bohniman.eftapi.model.MasterCurrentStatus;
 import com.bohniman.eftapi.model.TransCommunication;
@@ -21,7 +15,6 @@ import com.bohniman.eftapi.model.TransSuspect;
 import com.bohniman.eftapi.model.TransSuspectDoc;
 import com.bohniman.eftapi.model.User;
 import com.bohniman.eftapi.payload.CommunicationPayload;
-import com.bohniman.eftapi.payload.DocIdPayload;
 import com.bohniman.eftapi.repository.CommunicationRepository;
 import com.bohniman.eftapi.repository.CommunicationTypeRepository;
 import com.bohniman.eftapi.repository.CurrentStatusRepository;
@@ -30,13 +23,17 @@ import com.bohniman.eftapi.repository.NotificationRepository;
 import com.bohniman.eftapi.repository.PoliceCaseStatusRepository;
 import com.bohniman.eftapi.repository.StateRepository;
 import com.bohniman.eftapi.repository.SuspectDocRepository;
+import com.bohniman.eftapi.repository.SuspectDocumentRepository;
 import com.bohniman.eftapi.repository.SuspectRepository;
 import com.bohniman.eftapi.repository.ThanaRepository;
 import com.bohniman.eftapi.repository.UserRepository;
-import com.bohniman.eftapi.repository.SuspectDocumentRepository;
 import com.bohniman.eftapi.request.CommunicationForm;
 import com.bohniman.eftapi.request.NewDocForm;
 import com.bohniman.eftapi.response.Acknowledge;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommunicationService {

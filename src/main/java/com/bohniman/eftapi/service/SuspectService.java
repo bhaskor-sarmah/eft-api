@@ -13,11 +13,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
-import sun.misc.BASE64Decoder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.bohniman.eftapi.model.TransBiometricDetails;
 import com.bohniman.eftapi.model.TransBiometricTemplate;
@@ -57,6 +52,13 @@ import com.bohniman.eftapi.request.NewDocForm;
 import com.bohniman.eftapi.request.NewSuspectForm;
 import com.bohniman.eftapi.request.SuspectRequest;
 import com.bohniman.eftapi.response.Acknowledge;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import sun.misc.BASE64Decoder;
 
 @Service
 public class SuspectService {

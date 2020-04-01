@@ -1,15 +1,20 @@
 package com.bohniman.eftapi.service;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.bohniman.eftapi.model.AppDevice;
 import com.bohniman.eftapi.model.FtDevice;
 import com.bohniman.eftapi.model.TransSuspect;
+import com.bohniman.eftapi.payload.FtMasterTableSync;
+import com.bohniman.eftapi.payload.FtMasterVersion;
 import com.bohniman.eftapi.payload.FtPayload;
 import com.bohniman.eftapi.payload.SyncDocPayload;
-import com.bohniman.eftapi.payload.ThanaPayload;
-import com.bohniman.eftapi.repository.DeviceRepository;
+import com.bohniman.eftapi.payload.TransFtCaseRegisterPojo;
+import com.bohniman.eftapi.payload.TransFtCaseRegisterSync;
 import com.bohniman.eftapi.repository.FtDeviceRepository;
+import com.bohniman.eftapi.repository.MasterFtDocumentRepository;
+import com.bohniman.eftapi.repository.TransFtCaseRegisterRepository;
 import com.bohniman.eftapi.repository.TransFtOfflineDocRepository;
 import com.bohniman.eftapi.repository.TransSuspectRepository;
 
@@ -33,6 +38,12 @@ public class FtService {
 
 	@Autowired
 	TransFtOfflineDocRepository transFtOfflineDocRepository;
+
+	@Autowired
+	TransFtCaseRegisterRepository transFtCaseRegisterRepository;
+
+	@Autowired
+	MasterFtDocumentRepository masterFtDocumentRepository;
 	
     @Value("${app.file-upload}")
     String path;
@@ -71,5 +82,26 @@ public class FtService {
 
 	public TransSuspect getSuspectById(String suspectId){
 		return transSuspectRepository.findById(suspectId).get();
+	}
+
+	public FtMasterTableSync getFtMasterTableSync(FtMasterVersion ftMasterVersion) {
+		if(ftMasterVersion.getTableName().equals("FtCaseRegister") && ftMasterVersion.getMaxId() >= 0 && !ftMasterVersion.getFinalFtCode().equals("")){
+			// Object objList = 
+			List<TransFtCaseRegisterPojo> ftCaseRegisterList = transFtCaseRegisterRepository.findByFtCaseIdGreaterThan(Long.valueOf(ftMasterVersion.getMaxId()), ftMasterVersion.getFinalFtCode());
+			List<TransFtCaseRegisterSync> ftCaseRegisterListSync = new ArrayList<>();
+			for(TransFtCaseRegisterPojo obj : ftCaseRegisterList){
+				ftCaseRegisterListSync.add(obj.getSuspectSync());
+			}
+			FtMasterTableSync ftMasterTableSync = new FtMasterTableSync();
+			if(!ftCaseRegisterListSync.isEmpty()){
+				ftMasterTableSync.setFound(1);
+			}else{
+				ftMasterTableSync.setFound(0);
+			}
+			ftMasterTableSync.setTransFtCaseRegisterList(ftCaseRegisterListSync);
+			ftMasterTableSync.setMasterFtDocumentList(masterFtDocumentRepository.findAll());
+			return ftMasterTableSync;
+		}
+		return null;
 	}
 }

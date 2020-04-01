@@ -2,6 +2,18 @@ package com.bohniman.eftapi.controller;
 
 import javax.validation.Valid;
 
+import com.bohniman.eftapi.model.User;
+import com.bohniman.eftapi.payload.FtPayload;
+import com.bohniman.eftapi.payload.ThanaPayload;
+import com.bohniman.eftapi.repository.UserRepository;
+import com.bohniman.eftapi.request.LoginForm;
+import com.bohniman.eftapi.response.Acknowledge;
+import com.bohniman.eftapi.response.FtJwtAuthResponse;
+import com.bohniman.eftapi.response.JwtAuthResponse;
+import com.bohniman.eftapi.security.JwtProvider;
+import com.bohniman.eftapi.service.FtService;
+import com.bohniman.eftapi.service.ThanaService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,19 +26,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.bohniman.eftapi.model.User;
-import com.bohniman.eftapi.payload.FtPayload;
-import com.bohniman.eftapi.payload.ThanaPayload;
-import com.bohniman.eftapi.repository.DeviceRepository;
-import com.bohniman.eftapi.repository.UserRepository;
-import com.bohniman.eftapi.request.LoginForm;
-import com.bohniman.eftapi.response.Acknowledge;
-import com.bohniman.eftapi.response.FtJwtAuthResponse;
-import com.bohniman.eftapi.response.JwtAuthResponse;
-import com.bohniman.eftapi.security.JwtProvider;
-import com.bohniman.eftapi.service.FtService;
-import com.bohniman.eftapi.service.ThanaService;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,14 +1,5 @@
 package com.bohniman.eftapi.service;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import org.springframework.web.multipart.MultipartFile;
-
-import com.bohniman.eftapi.request.NewSuspectForm;
-
-import sun.misc.BASE64Decoder;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -19,6 +10,12 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import com.bohniman.eftapi.request.NewSuspectForm;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileUploadService {

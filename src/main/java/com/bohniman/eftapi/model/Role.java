@@ -1,7 +1,6 @@
 package com.bohniman.eftapi.model;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;

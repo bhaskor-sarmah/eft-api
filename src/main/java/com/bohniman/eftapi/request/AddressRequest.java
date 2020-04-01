@@ -1,31 +1,5 @@
 package com.bohniman.eftapi.request;
 
-import java.util.Date;
-
-import javax.persistence.Basic;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import com.bohniman.eftapi.model.MasterAddressType;
-import com.bohniman.eftapi.model.MasterCountry;
-import com.bohniman.eftapi.model.MasterCurrentStatus;
-import com.bohniman.eftapi.model.MasterDistrict;
-import com.bohniman.eftapi.model.MasterFt;
-import com.bohniman.eftapi.model.MasterState;
-import com.bohniman.eftapi.model.MasterThana;
-import com.bohniman.eftapi.model.MasterVillage;
-import com.bohniman.eftapi.model.TransSuspect;
-
 public class AddressRequest {
 
 	private String fkAddressTypeCode;

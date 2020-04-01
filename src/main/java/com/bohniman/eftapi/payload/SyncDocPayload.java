@@ -1,11 +1,10 @@
 package com.bohniman.eftapi.payload;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Objects;
 
 import com.bohniman.eftapi.model.TransFtOfflineDoc;
+
+import org.springframework.stereotype.Component;
 
 /**
  * SyncDocPayload
